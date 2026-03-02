@@ -2,6 +2,10 @@
 name = "haxball-replay-decoder"
 version = "0.1.0"
 edition = "2024"
+description = "Decoder for HaxBall replay files"
+license = "MIT"
+repository = "https://github.com/haxbrasil/haxball-replay-decoder"
+authors = ["gabhaxball <gabhaxball@gmail.com>"]
 
 [dependencies]
 flate2 = "1.1"
