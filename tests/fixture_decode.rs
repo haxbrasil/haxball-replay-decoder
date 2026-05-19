@@ -8,6 +8,18 @@ fn fixture_bytes() -> Vec<u8> {
     std::fs::read(path).expect("fixture replay file should exist")
 }
 
+fn emoji_avatar_fixture_bytes() -> Vec<u8> {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/headless-avatar-emoji.hbr2");
+    std::fs::read(path).expect("emoji avatar fixture replay file should exist")
+}
+
+fn headless_avatar_emoji_match_fixture_bytes() -> Vec<u8> {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/headless-avatar-emoji-match.hbr2");
+    std::fs::read(path).expect("headless avatar emoji match fixture replay file should exist")
+}
+
 #[test]
 fn decodes_fixture_replay() {
     let bytes = fixture_bytes();
@@ -50,6 +62,47 @@ fn fixture_is_valid_in_strict_profile() {
     let bytes = fixture_bytes();
     let report = validate(&bytes);
 
+    assert!(
+        report.is_valid(),
+        "expected strict validation to pass, issues: {:?}",
+        report.issues
+    );
+}
+
+#[test]
+fn decodes_headless_avatar_emoji() {
+    let bytes = emoji_avatar_fixture_bytes();
+    let replay = decode(&bytes).expect("emoji avatar fixture should decode");
+
+    let avatar = replay.events.iter().find_map(|event| match &event.payload {
+        EventPayload::SetHeadlessAvatar(event) => event.value.as_deref(),
+        _ => None,
+    });
+
+    assert_eq!(avatar, Some("🏈"));
+}
+
+#[test]
+fn headless_avatar_emoji_fixture_is_valid_in_strict_profile() {
+    let bytes = emoji_avatar_fixture_bytes();
+    let report = validate(&bytes);
+
+    assert!(
+        report.is_valid(),
+        "expected strict validation to pass, issues: {:?}",
+        report.issues
+    );
+}
+
+#[test]
+fn headless_avatar_emoji_match_fixture_is_valid_in_strict_profile() {
+    let bytes = headless_avatar_emoji_match_fixture_bytes();
+    let replay = decode(&bytes).expect("headless avatar emoji match fixture should decode");
+
+    assert_eq!(replay.version, 3);
+    assert_eq!(replay.total_frames, 2435);
+
+    let report = validate(&bytes);
     assert!(
         report.is_valid(),
         "expected strict validation to pass, issues: {:?}",
